@@ -1,5 +1,4 @@
 import logging
-import random
 import re
 
 # Set up logger
@@ -116,29 +115,3 @@ class ArgsIn:
                            squelch=squelch)
             
 
-
-
-if __name__ == '__main__':
-    # args_map = [(['one'], (lambda x: 'two',),)]
-    STOP = 0
-    argsin = ArgsIn()
-    # argsin.add_action(['name', 'nickname'],  # these are argument identifiers
-    #                   # these are actions to execute
-    #                   lambda user_input: print("Looking for: {}...".format(user_input)))
-    # argsin.add_action(['skip', 's'],
-    #                   SKIP)
-    # val = argsin('Find user: ')
-    # print(val)
-    STOP = 0
-    argsin.add_action('stop', STOP)
-    while True:
-        number = random.randint(0, 10)
-        value = argsin('guess number between 1 and 10: ')
-        if STOP in value[1]:
-            print('you gave up :(')
-            break
-        if value[0] == str(number):
-            print('you won!')
-            break
-        else:
-            print('wrong, it was: {}'.format(number))
