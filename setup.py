@@ -2,8 +2,9 @@ from distutils.core import setup
 
 setup(
     name='argsin',
-    version='0.1',
+    version='0.2',
     py_modules=['argsin'],
+    packages=[],
     url='https://github.com/Granitas/argsin',
     license='GPL',
     author='Granitas',

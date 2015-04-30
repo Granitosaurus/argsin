@@ -11,6 +11,26 @@ ch.setFormatter(formatter)
 argsin_logger.addHandler(ch)
 
 
+class Input:
+    """Class for storing ArgsIn input returns"""
+    def __init__(self, text, action_returns, args):
+        self.text = text
+        self.action_returns = action_returns
+        self.args = args
+
+    def __repr__(self):
+        return '({},{},{})'.format(self.text, self.action_returns, self.args)
+
+    def __getitem__(self, item):
+        if item == 0:
+            return self.text
+        if item == 1:
+            return self.action_returns
+        if item == 2:
+            return self.args
+        raise IndexError("ArgsIn Input only has 3 values(text,[action_returns],[args])")
+
+
 class ArgsIn:
     arg_value_regex = re.compile('\B-{1,2}([^\b|^\s]+)(?:\s|)(?:"|)([^-]+|-\d+|)')
     arg_regex = re.compile('(\B-{1,2}[^\b|^\s]+(?:\s|)(?:"|))')
@@ -38,7 +58,7 @@ class ArgsIn:
                single_action=False,
                squelch=False):
         """
-        Smart input for question answers which reads the answer for arguments such as --hint
+        Smart input for question answers which reads the answer for arguments (i.e. --hint)
         :param msg:
         :param input_manager:
         :param recursion_on_invalid:
@@ -48,11 +68,13 @@ class ArgsIn:
         """
         if not input_manager:
             input_manager = self.default_input_manager
+        elif not callable(input_manager) and recursion_on_invalid:
+            raise ValueError('recursion on valid cannot be true if input_manager is not callable(infinite recursion)')
         text, args = self.find_arguments(input_manager(msg))
         func_returns = []
         for arg, value in args.items():
-            valid = any(arg in action[0] for action in self.action_map)
-            if not valid:
+            invalid = not any(arg in action[0] for action in self.action_map)
+            if invalid:
                 if not squelch:
                     argsin_logger.info('Unknown arg: "{}"'.format(arg))
                 if recursion_on_invalid:
@@ -75,14 +97,13 @@ class ArgsIn:
                         # is not a callable
                         func_returns.append(item)
                 if single_action:
-                    return text, func_returns
-        return text, func_returns
+                    return Input(text, func_returns, args)
+        return Input(text, func_returns, args)
 
     def add_action(self, identifiers, *actions):
         """
         Add action to the action_map
         :param identifiers: possible valid arguments
-        :param returns: if None is set will return input text (without arguments)
         :param actions: function to execute, must be able to receive 1 argument value
         """
         if isinstance(identifiers, str):
@@ -115,3 +136,9 @@ class ArgsIn:
                            squelch=squelch)
             
 
+if __name__ == '__main__':
+    argsin = ArgsIn()
+    argsin.add_action(['name', 'nickname'],
+                      lambda user_input: print("Looking for: {}...".format(user_input)))
+    value = argsin('Find user:')
+    print(value[3])
