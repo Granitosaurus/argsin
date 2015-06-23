@@ -5,17 +5,16 @@ ArgsIn is an argument manager for user input. It's a simple module that provides
 
     argsin = ArgsIn()
     argsin.add_action(['name', 'nickname'],  # these are argument identifiers
-                      # these are actions to execute
-                      lambda user_input: print("Looking for: {}...".format(user_input)))
-    value = argsin('Find user:')
+                      lambda *args, **kwargs: print(kwargs))  # these are actions to execute
+    value = argsin('Find user: ')
+    print(value)
     
 Outcome:
 
-    >>>Find user: Pork Flavor --nickname Vector3000
-    >>>Looking for: Vector3000...
-    print(value)
-    >>>('Pork Flavor', [None])
-    # ^ first value is user input without arguments, second value is what action returns  
+    >>>Find user: hello --name Guido  # input
+    >>>{'value': 'Guido', 'text': 'hello'} # action executed
+    >>>(hello,[None],{'name': 'Guido'})  # that's print(value)
+    # ^ (user input without arguments, what action returns, {arg: value,..} dict)
     
 We can also use user input to resolve some code, example number guessing game:
 
